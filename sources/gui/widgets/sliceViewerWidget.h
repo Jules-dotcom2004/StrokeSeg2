@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "clickableLabel.h"
+#include "ClickableLabel.h"
 #include "niftiVolume.h"
 #include <QLabel>
 #include <QSlider>

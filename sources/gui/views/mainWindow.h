@@ -111,7 +111,7 @@ private:
      * @param closeBtn Reference to the close button.
      * @param reduceBtn Reference to the minimize button.
      */
-    void titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn);
+    void titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn, QPushButton *&increaseBtn, QPushButton *&normalBtn);
 
     /**
      * @brief Updates the state of the run button.

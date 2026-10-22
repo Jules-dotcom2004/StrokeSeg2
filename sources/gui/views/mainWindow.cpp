@@ -22,6 +22,7 @@
 #include <utils/pipelineParams.h>
 #include "niftiViewerWindow.h"
 #include <widgets/flowLayout.h>
+#include <QWindow>
 
 #ifdef Q_OS_WIN
     #include <windows.h>
@@ -37,7 +38,7 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
 
     setWindowTitle("StrokeSeg2");
     setWindowIcon(QIcon(":/gui/resources/StrokeSegPWR.ico"));
-    resize(1280, 720);
+    resize(1200, 720);
 
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
@@ -82,8 +83,10 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
 
     QPushButton *closeBtn = nullptr;
     QPushButton *reduceBtn = nullptr;
+    QPushButton *increaseBtn = nullptr;
+    QPushButton *normalBtn = nullptr;
 
-    titleBar(closeBtn, reduceBtn);
+    titleBar(closeBtn, reduceBtn,increaseBtn,normalBtn);
 
     // =========================================================
     //                      MENU BAR
@@ -285,6 +288,16 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     connect(m_resetSettings, &QPushButton::clicked, m_parametersForm, &ParametersFormWidget::resetFields);
     connect(closeBtn, &QPushButton::clicked, this, &QWidget::close);
     connect(reduceBtn, &QPushButton::clicked, this, &QWidget::showMinimized);
+    connect(increaseBtn, &QPushButton::clicked, this, [this,increaseBtn,normalBtn]() {
+        showFullScreen();
+        increaseBtn->setFixedSize(0,0);
+        normalBtn->setFixedSize(30,25);
+    });
+    connect(normalBtn,&QPushButton::clicked, this, [this,increaseBtn,normalBtn]() {
+        showNormal();
+        increaseBtn->setFixedSize(30,25);
+        normalBtn->setFixedSize(0,0);
+    });
     connect(m_runButton, &QPushButton::clicked, this, &MainWindow::Process);
 
     connect(actionGuide, &QAction::triggered, this, &MainWindow::openGuide);
@@ -338,7 +351,7 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     }
 }
 
-void MainWindow::titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn) 
+void MainWindow::titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn, QPushButton *&increaseBtn, QPushButton *&normalBtn) 
 {
     m_titleBar = new QWidget(m_mainWidget);
     m_titleBar->setObjectName("titleBar");
@@ -348,6 +361,8 @@ void MainWindow::titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn)
 
     closeBtn = new QPushButton("\u00D7", m_titleBar);
     reduceBtn = new QPushButton("\u2212", m_titleBar);
+    increaseBtn = new QPushButton("\u25AB",m_titleBar);
+    normalBtn = new QPushButton("\u25F1",m_titleBar);
 
     QHBoxLayout *titleLayout = new QHBoxLayout(m_titleBar);
     titleLayout->setContentsMargins(60, 0, 0, 2);
@@ -356,13 +371,18 @@ void MainWindow::titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn)
     QLabel *title = new QLabel("StrokeSeg2", m_titleBar);
     closeBtn->setObjectName("closeBtn");
 
+
     reduceBtn->setFixedSize(30, 25);
+    normalBtn->setFixedSize(0,0);
+    increaseBtn->setFixedSize(30,25);
     closeBtn->setFixedSize(30, 25);
 
     titleLayout->addStretch();
     titleLayout->addWidget(title);
     titleLayout->addStretch();
     titleLayout->addWidget(reduceBtn);
+    titleLayout->addWidget(normalBtn);
+    titleLayout->addWidget(increaseBtn);
     titleLayout->addWidget(closeBtn);
 }
 
@@ -379,29 +399,19 @@ void MainWindow::titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn)
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) 
 {
     bool result = QMainWindow::eventFilter(obj, event);
-
-    if (obj == m_titleBar) 
+    if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonRelease) 
     {
-        if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonRelease) 
+        int m = 20;
+        m_dragging = false;
+        auto *e = static_cast<QMouseEvent *>(event);
+        if (event->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton) 
         {
-            auto *e = static_cast<QMouseEvent *>(event);
-            if (event->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton) 
-            {
-                m_dragging = true;
-                m_dragPosition = e->globalPosition().toPoint() - frameGeometry().topLeft();
+            m_dragPosition = e->globalPosition().toPoint() - frameGeometry().topLeft();
+            Qt::Edges e;
+            if (obj==m_titleBar){
+                windowHandle()->startSystemMove();
                 result = true;
             }
-            if (event->type() == QEvent::MouseMove && m_dragging) 
-            {
-                move(e->globalPosition().toPoint() - m_dragPosition);
-                result = true;
-            }
-            if (event->type() == QEvent::MouseButtonRelease) 
-            {
-                m_dragging = false;
-                result = true;
-            }
-        }
     }
     return result;
 }
