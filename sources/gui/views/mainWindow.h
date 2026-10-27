@@ -13,6 +13,7 @@
 #include <QMouseEvent>
 #include <QPointer>
 #include <QPushButton>
+#include <QToolButton>
 #include <QStackedWidget>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -74,6 +75,8 @@ class MainWindow : public QMainWindow
     QPoint m_dragPosition; /**< The position where the mouse was clicked for dragging. */
 
 private:
+    static constexpr int kWindowWidth  = 1200;
+    static constexpr int kWindowHeight = 720;
     QWidget *m_mainWidget; /**< The main widget containing the UI elements. */
     QWidget *m_titleBar; /**< The title bar widget for window dragging. */
 
@@ -111,7 +114,8 @@ private:
      * @param closeBtn Reference to the close button.
      * @param reduceBtn Reference to the minimize button.
      */
-    void titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn, QPushButton *&increaseBtn, QPushButton *&normalBtn);
+
+    void titleBar(QToolButton *&closeBtn, QToolButton *&reduceBtn, QToolButton *&increaseBtn, QToolButton *&normalBtn, QToolButton *&actionGuide,QToolButton *&actionAbout,QToolButton *&actionResetWW);
 
     /**
      * @brief Updates the state of the run button.

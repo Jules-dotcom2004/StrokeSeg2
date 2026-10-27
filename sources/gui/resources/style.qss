@@ -43,30 +43,32 @@ QWidget#titleBar {
     border:none;
 }
 
-QWidget#titleBar QPushButton {
+QWidget#titleBar QToolButton {
     color:#ffffff;
     margin:0;
     text-align:center;
-    background-color: #5ea6f2;
     border-radius:0;
-    font-size:18px;
+    font-size:15px;
 }
 
-QWidget#titleBar QPushButton#closeBtn {
+
+QWidget#titleBar QToolButton#actionAbout:hover{
+    border-top-left-radius:10px;
+}
+
+
+QWidget#titleBar QToolButton#closeBtn:hover  {
+    background-color:#e65f5f;
     border-top-right-radius:10px;
 }
 
-QWidget#titleBar QPushButton#closeBtn:hover  {
-    background-color:#ff8474;
-}
-
-QWidget#titleBar QPushButton:hover {
+QWidget#titleBar QToolButton:hover {
     background-color:#94dcff;
 }
 
 QWidget#titleBar QLabel {
     color:#ffffff;
-    font-size:11px;
+    font-size:17px;
     font-weight:bold;
     margin:0;
     border:none;
@@ -156,10 +158,10 @@ ParametersFormWidget QComboBox,
 ParametersFormWidget QPushButton{
     background-color:#eff4fa;
     color:#0a0c0f;
-    padding:5px 10px;
+    padding:0.5em 1em;
     border-radius:5px;
     border: none;
-    font-size:14px;
+    font-size:1em;
     selection-background-color: #5ea6f2;
     selection-color: #ffffff;
 }
@@ -167,11 +169,11 @@ ParametersFormWidget QPushButton{
 ParametersFormWidget QLineEdit#suffix,
 ParametersFormWidget QComboBox,
 ParametersFormWidget QPushButton {
-    margin:0px 10px 0px 0;
+    margin: 0.2em 0;
 }
 
 ParametersFormWidget QComboBox {
-    width:170px;
+    width:40%;
 }
 
 ParametersFormWidget QPushButton:hover{
@@ -266,7 +268,8 @@ ParametersFormWidget QComboBox::down-arrow:on {
 }
 
 ParametersFormWidget QCheckBox {
-    /* margin:4px 0 4px 120px; */
+    /*margin:4px 0 4px 120px;*/
+    margin: 0.5em 0;
     right:0;
     /*margin:4px 0 4px 0px;*/
 }
@@ -359,9 +362,6 @@ QPushButton#runBtn:disabled {
     
     text-align:center;
     qproperty-iconSize : 50px 50px;
-    
-    min-width: 220px;
-    min-height: 170px;
 }
 
 #inputsContainer FileDropButton QLabel {

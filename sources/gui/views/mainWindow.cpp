@@ -38,9 +38,10 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
 
     setWindowTitle("StrokeSeg2");
     setWindowIcon(QIcon(":/gui/resources/StrokeSegPWR.ico"));
-    resize(1200, 720);
+    resize(kWindowWidth, kWindowHeight);
 
-    setWindowFlags(Qt::FramelessWindowHint);
+    //setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -81,32 +82,35 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     //                      TITLE BAR
     // =========================================================
 
-    QPushButton *closeBtn = nullptr;
-    QPushButton *reduceBtn = nullptr;
-    QPushButton *increaseBtn = nullptr;
-    QPushButton *normalBtn = nullptr;
+    QToolButton *closeBtn = nullptr;
+    QToolButton *reduceBtn = nullptr;
+    QToolButton *increaseBtn = nullptr;
+    QToolButton *normalBtn = nullptr;
+    QToolButton *actionGuide = nullptr;
+    QToolButton *actionAbout = nullptr;
+    QToolButton *actionResetWW = nullptr;
 
-    titleBar(closeBtn, reduceBtn,increaseBtn,normalBtn);
+    titleBar(closeBtn, reduceBtn,increaseBtn,normalBtn,actionGuide,actionAbout,actionResetWW);
 
     // =========================================================
     //                      MENU BAR
     // =========================================================
 
-    QMenuBar *menuBar = new QMenuBar(m_mainWidget);
+    /* QMenuBar *menuBar = new QMenuBar(m_mainWidget);
     menuBar->setObjectName("menuBar");
 
     QMenu *helpMenu = menuBar->addMenu("Help");
-    QAction *actionGuide = new QAction("Guide", this);
-    helpMenu->addAction(actionGuide);
-    QAction *actionAbout = new QAction("About", this);
-    helpMenu->addAction(actionAbout);
-    QAction *actionResetWW = new QAction("Show warning", this);
-    actionResetWW->setCheckable(true);
+    QAction *actionsGuide = new QAction("Guide", this);
+    helpMenu->addAction(actionsGuide);
+    QAction *actionsAbout = new QAction("About", this);
+    helpMenu->addAction(actionsAbout);
+    QAction *actionsResetWW = new QAction("Show warning", this);
+    actionsResetWW->setCheckable(true);
 
     showWarning = settings.value("showWarning", true).toBool();
-    actionResetWW->setChecked(showWarning);
+    actionsResetWW->setChecked(showWarning);
 
-    helpMenu->addAction(actionResetWW);
+    helpMenu->addAction(actionsResetWW); */
 
     // =========================================================
     //                     LEFT COLUMN
@@ -115,10 +119,12 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     QWidget *leftColumnBg = new QWidget(m_mainWidget);
     leftColumnBg->setObjectName("leftColumnBg");
     leftColumnBg->setAttribute(Qt::WA_StyledBackground, true);
+    leftColumnBg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QWidget *leftColumn = new QWidget(leftColumnBg);
     leftColumn->setObjectName("leftColumn");
     leftColumn->setAttribute(Qt::WA_StyledBackground, true);
+    leftColumn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QVBoxLayout *leftBgLayout = new QVBoxLayout(leftColumnBg);
     leftBgLayout->setContentsMargins(0, 0, 0, 0);
@@ -134,6 +140,7 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     QWidget *bottomBtns = new QWidget(leftColumn);
     bottomBtns->setObjectName("bottomBtns");
     bottomBtns->setAttribute(Qt::WA_StyledBackground, true);
+    bottomBtns->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QHBoxLayout *bottomLayout = new QHBoxLayout(bottomBtns);
 
@@ -276,7 +283,7 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     mainLayout->setStretch(1, 7);
 
     windowLayout->addWidget(m_titleBar);
-    windowLayout->addWidget(menuBar);
+    //windowLayout->addWidget(menuBar);
     windowLayout->addLayout(mainLayout);
 
     // =========================================================
@@ -286,30 +293,30 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     connect(m_modelManager, &QPushButton::clicked, this, &MainWindow::openModelManager);
     connect(m_terminalButton, &QPushButton::clicked, this, &MainWindow::toggleConsole);
     connect(m_resetSettings, &QPushButton::clicked, m_parametersForm, &ParametersFormWidget::resetFields);
-    connect(closeBtn, &QPushButton::clicked, this, &QWidget::close);
-    connect(reduceBtn, &QPushButton::clicked, this, &QWidget::showMinimized);
-    connect(increaseBtn, &QPushButton::clicked, this, [this,increaseBtn,normalBtn]() {
+    connect(closeBtn, &QToolButton::clicked, this, &QWidget::close);
+    connect(reduceBtn, &QToolButton::clicked, this, &QWidget::showMinimized);
+    connect(increaseBtn, &QToolButton::clicked, this, [this,increaseBtn,normalBtn]() {
         showFullScreen();
         increaseBtn->setFixedSize(0,0);
-        normalBtn->setFixedSize(30,25);
+        normalBtn->setFixedSize(50,40);
     });
-    connect(normalBtn,&QPushButton::clicked, this, [this,increaseBtn,normalBtn]() {
+    connect(normalBtn,&QToolButton::clicked, this, [this,increaseBtn,normalBtn]() {
         showNormal();
-        increaseBtn->setFixedSize(30,25);
+        increaseBtn->setFixedSize(50,40);
         normalBtn->setFixedSize(0,0);
     });
     connect(m_runButton, &QPushButton::clicked, this, &MainWindow::Process);
 
-    connect(actionGuide, &QAction::triggered, this, &MainWindow::openGuide);
-    connect(actionAbout, &QAction::triggered, this, &MainWindow::openAbout);
+    connect(actionGuide, &QPushButton::clicked, this, &MainWindow::openGuide);
+    connect(actionAbout, &QPushButton::clicked, this, &MainWindow::openAbout);
 
-    connect(actionResetWW, &QAction::toggled, this, [this](bool checked) 
+    /* connect(actionResetWW, &QAction::toggled, this, [this](bool checked) 
     {
         showWarning = checked;
         QSettings settings;
         settings.setValue("showWarning", showWarning);
     });
-
+ */
     connect(&ProgressManager::instance(), &ProgressManager::progressUpdated, this,
             [progressBar, percentLabel](int value)
     {
@@ -351,32 +358,57 @@ MainWindow::MainWindow(const PipelineParams &opts, QWidget *parent) : QMainWindo
     }
 }
 
-void MainWindow::titleBar(QPushButton *&closeBtn, QPushButton *&reduceBtn, QPushButton *&increaseBtn, QPushButton *&normalBtn) 
+void MainWindow::titleBar(QToolButton *&closeBtn, QToolButton *&reduceBtn, QToolButton *&increaseBtn, QToolButton *&normalBtn, QToolButton*&actionGuide,QToolButton*&actionAbout,QToolButton*&actionResetWW) 
 {
     m_titleBar = new QWidget(m_mainWidget);
     m_titleBar->setObjectName("titleBar");
-    m_titleBar->setFixedHeight(25);
+    m_titleBar->setFixedHeight(40);
     m_titleBar->installEventFilter(this);
     m_titleBar->setAttribute(Qt::WA_StyledBackground, true);
 
-    closeBtn = new QPushButton("\u00D7", m_titleBar);
-    reduceBtn = new QPushButton("\u2212", m_titleBar);
-    increaseBtn = new QPushButton("\u25AB",m_titleBar);
-    normalBtn = new QPushButton("\u25F1",m_titleBar);
-
-    QHBoxLayout *titleLayout = new QHBoxLayout(m_titleBar);
-    titleLayout->setContentsMargins(60, 0, 0, 2);
-    titleLayout->setSpacing(0);
-
-    QLabel *title = new QLabel("StrokeSeg2", m_titleBar);
+    closeBtn = new QToolButton(m_titleBar);
+    closeBtn->setText(QString::fromUtf8("\u2715"));
+    closeBtn->setAutoRaise(true);
+    closeBtn->setFixedSize(50,40);
     closeBtn->setObjectName("closeBtn");
 
+    reduceBtn = new QToolButton(m_titleBar);
+    reduceBtn->setText(QString::fromUtf8("\u2014"));
+    reduceBtn->setAutoRaise(true);
+    reduceBtn->setFixedSize(50,40);
 
-    reduceBtn->setFixedSize(30, 25);
+    
+    increaseBtn =  new QToolButton(m_titleBar);
+    increaseBtn->setText(QString::fromUtf8("\u25A1"));
+    increaseBtn->setAutoRaise(true);
+    increaseBtn->setFixedSize(50,40);
+    
+    normalBtn =  new QToolButton(m_titleBar);
+    normalBtn->setText(QString::fromUtf8("\u2750"));
+    normalBtn->setAutoRaise(true);
     normalBtn->setFixedSize(0,0);
-    increaseBtn->setFixedSize(30,25);
-    closeBtn->setFixedSize(30, 25);
 
+    QHBoxLayout *titleLayout = new QHBoxLayout(m_titleBar);
+    titleLayout->setContentsMargins(0, 0,0, 2);
+    titleLayout->setSpacing(0);
+
+    actionGuide =  new QToolButton(m_titleBar);
+    actionGuide->setFixedSize(70,40);
+    actionGuide->setText("Guide");
+    actionAbout = new QToolButton(m_titleBar);
+    actionAbout->setText("About");
+    actionAbout->setFixedSize(70,40);
+    actionAbout->setObjectName("actionAbout");
+    /*actionResetWW = new QAction("Show warning", this);
+    actionResetWW->setCheckable(true);
+    QSettings settings;
+    showWarning = settings.value("showWarning", true).toBool();
+    actionResetWW->setChecked(showWarning); */
+
+    QLabel *title = new QLabel("StrokeSeg2", m_titleBar);
+    titleLayout->addWidget(actionAbout);
+    titleLayout->addWidget(actionGuide);
+    //titleLayout->addWidget(actionResetWW);
     titleLayout->addStretch();
     titleLayout->addWidget(title);
     titleLayout->addStretch();
@@ -401,17 +433,23 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     bool result = QMainWindow::eventFilter(obj, event);
     if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonRelease) 
     {
-        int m = 20;
-        m_dragging = false;
         auto *e = static_cast<QMouseEvent *>(event);
         if (event->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton) 
         {
-            m_dragPosition = e->globalPosition().toPoint() - frameGeometry().topLeft();
-            Qt::Edges e;
             if (obj==m_titleBar){
                 windowHandle()->startSystemMove();
+                QMouseEvent release(QEvent::MouseButtonRelease,
+                            e->position(),
+                            e->globalPosition(),
+                            Qt::LeftButton,
+                            Qt::NoButton,
+                            e->modifiers());
+                QCoreApplication::sendEvent(this, &release);
+
+                event->accept();
                 result = true;
             }
+        }
     }
     return result;
 }
@@ -752,7 +790,7 @@ void MainWindow::setupInputButtonsForModel(const QStringList &inputNames)
         btn->setObjectName(QString("chooseFileButton_%1").arg(inputName.toLower()));
         btn->setAcceptDrops(true);
         btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        btn->setMinimumSize(220, 170);
+        btn->setMinimumSize(kWindowWidth/2, kWindowHeight/2);
 
         QVBoxLayout *buttonLayout = new QVBoxLayout(btn);
         buttonLayout->setContentsMargins(8, 8, 8, 8);

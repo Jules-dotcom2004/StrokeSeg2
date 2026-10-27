@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "guideWindow.h"
+#include <QWindow>
 
 GuideWindow::GuideWindow(QWidget *parent) : QWidget(parent) {
     setAttribute(Qt::WA_DeleteOnClose);
@@ -41,12 +42,17 @@ GuideWindow::GuideWindow(QWidget *parent) : QWidget(parent) {
     titleLayout->setSpacing(0);
 
     QLabel *title = new QLabel("Guide", m_titleBar);
-    QPushButton *reduceBtn = new QPushButton("\u2212", m_titleBar);
-    QPushButton *closeBtn = new QPushButton("\u00D7", m_titleBar);
+    QToolButton *closeBtn = new QToolButton(m_titleBar);
+    closeBtn->setText(QString::fromUtf8("\u2715"));
+    closeBtn->setAutoRaise(true);
+    closeBtn->setFixedSize(30,25);
     closeBtn->setObjectName("closeBtn");
 
-    reduceBtn->setFixedSize(30, 25);
-    closeBtn->setFixedSize(30, 25);
+    QToolButton *reduceBtn = new QToolButton(m_titleBar);
+    reduceBtn->setText(QString::fromUtf8("\u2014"));
+    reduceBtn->setAutoRaise(true);
+    reduceBtn->setFixedSize(30,25);
+
 
     titleLayout->addStretch();
     titleLayout->addWidget(title);
@@ -90,8 +96,8 @@ GuideWindow::GuideWindow(QWidget *parent) : QWidget(parent) {
     //                     CONNECT
     // =========================================================
 
-    connect(closeBtn, &QPushButton::clicked, this, &QWidget::close);
-    connect(reduceBtn, &QPushButton::clicked, this, &QWidget::showMinimized);
+    connect(closeBtn, &QToolButton::clicked, this, &QWidget::close);
+    connect(reduceBtn, &QToolButton::clicked, this, &QWidget::showMinimized);
 }
 
 // =========================================================
@@ -99,21 +105,26 @@ GuideWindow::GuideWindow(QWidget *parent) : QWidget(parent) {
 // =========================================================
 
 bool GuideWindow::eventFilter(QObject *obj, QEvent *event) {
-    if (obj == m_titleBar) {
+    bool result = QWidget::eventFilter(obj, event);
+    if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonRelease) 
+    {
         auto *e = static_cast<QMouseEvent *>(event);
-        if (event->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton) {
-            m_dragging = true;
-            m_dragPosition = e->globalPosition().toPoint() - frameGeometry().topLeft();
-            return true;
-        }
-        if (event->type() == QEvent::MouseMove && m_dragging) {
-            move(e->globalPosition().toPoint() - m_dragPosition);
-            return true;
-        }
-        if (event->type() == QEvent::MouseButtonRelease) {
-            m_dragging = false;
-            return true;
+        if (event->type() == QEvent::MouseButtonPress && e->button() == Qt::LeftButton) 
+        {
+            if (obj==m_titleBar){
+                windowHandle()->startSystemMove();
+                QMouseEvent release(QEvent::MouseButtonRelease,
+                            e->position(),
+                            e->globalPosition(),
+                            Qt::LeftButton,
+                            Qt::NoButton,
+                            e->modifiers());
+                QCoreApplication::sendEvent(this, &release);
+
+                event->accept();
+                result = true;
+            }
         }
     }
-    return QWidget::eventFilter(obj, event);
+    return result;
 }

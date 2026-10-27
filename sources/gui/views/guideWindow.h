@@ -6,11 +6,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QApplication>
-
 #include <QPushButton>
 #include <QLabel>
 #include <QMouseEvent>
-
+#include <QToolButton>
 #include <QTextEdit>
 #include <QFile>
 
